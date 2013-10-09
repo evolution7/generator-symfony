@@ -1,0 +1,14 @@
+Description:
+    Creates a new basic Symfony web application.
+
+Example:
+    yo symfony
+
+    This will create:
+        Gruntfile.js: Configuration for the task runner.
+        bower.json: Front-end packages installed by bower.
+        package.json: Development packages installed by npm.
+        composer.json: PHP packages installed by Composer.
+        app/, src/, web/: Symfony "Standard Edition" files.
+        (Optional) Vagrantfile: Vagrant configuration file.
+        (Optional) cookbooks: Chef cookbooks for your Vagrant machine.

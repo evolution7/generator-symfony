@@ -1,6 +1,6 @@
-# Symfony app generator
+# Symfony 2 app generator
 
-Yeoman generator that scaffolds out a Symfony web app.
+Yeoman generator that scaffolds out a Symfony 2 PHP web app.
 
 ## Features
 

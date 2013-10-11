@@ -34,9 +34,6 @@ describe('Symfony generator test', function () {
       
       'web/scripts/app.js',
 
-      'web/manifests/header.html',
-      'web/manifests/footer.html',
-      
       '.git'
 
     ];

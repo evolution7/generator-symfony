@@ -4,7 +4,23 @@
         <meta http-equiv="Content-Type" content="text/html; charset={{ _charset }}"/>
         <meta name="robots" content="noindex,nofollow" />
         <title>{% block title %}{% endblock %}</title>
-        {{ include_manifest('header') }}
+
+        <!-- build:css /dist/css/screen.css -->
+        <link rel="stylesheet" href="/bundles/framework/css/structure.css">
+        <link rel="stylesheet" href="/bundles/framework/css/body.css">
+        <link rel="stylesheet" href="/css/screen.css">
+        <!-- endbuild -->
+        <!-- build:css /dist/css/print.css -->
+        <link rel="stylesheet" href="/css/print.css" media="print">
+        <!-- endbuild -->
+        <!-- build:js /dist/scripts/vendor/izr.js -->
+        <script src="/bower_components/modernizr/modernizr.js"></script>
+        <script src="/bower_components/detectizr/detectizr.js"></script>
+        <script>
+          Modernizr.Detectizr.detect({detectScreen:false});
+        </script>
+        <!-- endbuild -->
+
         {% block head %}{% endblock %}
     </head>
     <body>
@@ -39,6 +55,13 @@
                 {% block body %}{% endblock %}
             </div>
         </div>
-        {{ include_manifest('footer') }}
+        
+        <!-- build:js /dist/scripts/app.js -->
+        <!-- bower:js -->
+        <script src="/bower_components/jquery/jquery.js"></script>
+        <script src="/scripts/app.js"></script>
+        <!-- endbower -->
+        <!-- endbuild -->
+
     </body>
 </html>

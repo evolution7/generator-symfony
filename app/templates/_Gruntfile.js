@@ -33,7 +33,9 @@ module.exports = function (grunt) {
          */
         yeoman: {
             app: 'web',
-            dist: 'web/dist'
+            dist: 'web/dist',
+            sfApp: 'app/Resources/views',
+            sfDist: 'app/dist/Resources/views'
         },
 
         /****************************************************************
@@ -63,7 +65,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: [
-                    '<%%= yeoman.app %>/manifests/*.html',
+                    '<%%= yeoman.sfApp %>/*.html.twig',
                     '<%%= yeoman.app %>/css/{,*/}*.css',
                     '{<%%= yeoman.dist %>,<%%= yeoman.app %>}/scripts/{,*/}*.js',
                     '<%%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
@@ -233,16 +235,44 @@ module.exports = function (grunt) {
          * into a set of HTML files (or any templates/views).
          */
         useminPrepare: {
-            html: '<%%= yeoman.app %>/manifests/*.html',
+            html: '<%%= yeoman.sfApp %>/*.html.twig',
             options: {
                 root: '<%%= yeoman.app %>',
                 dest: '<%%= yeoman.dist %>/../' // This allows us to use /dist/ in the manifests
             }
         },
         usemin: {
-            html: ['<%%= yeoman.dist %>/manifests/*.html'],
+            html: ['<%%= yeoman.sfDist %>/*.html.twig'],
             options: {
                 assetsDirs: ['<%%= yeoman.dist %>/../']
+            }
+        },
+
+        /**
+         * grunt-contrib-htmlmin
+         * @see https://github.com/gruntjs/grunt-contrib-htmlmin
+         *
+         * Minify HTML.
+         */
+        htmlmin: {
+            dist: {
+                options: {
+                    /*removeCommentsFromCDATA: true,
+                    // https://github.com/yeoman/grunt-usemin/issues/44
+                    //collapseWhitespace: true,
+                    collapseBooleanAttributes: true,
+                    removeAttributeQuotes: true,
+                    removeRedundantAttributes: true,
+                    useShortDoctype: true,
+                    removeEmptyAttributes: true,
+                    removeOptionalTags: true*/
+                },
+                files: [{
+                    expand: true,
+                    cwd: '<%%= yeoman.sfApp %>',
+                    src: '*.html.twig',
+                    dest: '<%%= yeoman.sfDist %>'
+                }]
             }
         },
 
@@ -276,34 +306,6 @@ module.exports = function (grunt) {
                     cwd: '<%%= yeoman.app %>/images',
                     src: '{,*/}*.svg',
                     dest: '<%%= yeoman.dist %>/images'
-                }]
-            }
-        },
-
-        /**
-         * grunt-contrib-htmlmin
-         * @see https://github.com/gruntjs/grunt-contrib-htmlmin
-         *
-         * Minify HTML.
-         */
-        htmlmin: {
-            dist: {
-                options: {
-                    /*removeCommentsFromCDATA: true,
-                    // https://github.com/yeoman/grunt-usemin/issues/44
-                    //collapseWhitespace: true,
-                    collapseBooleanAttributes: true,
-                    removeAttributeQuotes: true,
-                    removeRedundantAttributes: true,
-                    useShortDoctype: true,
-                    removeEmptyAttributes: true,
-                    removeOptionalTags: true*/
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%%= yeoman.app %>',
-                    src: 'manifests/*.html',
-                    dest: '<%%= yeoman.dist %>'
                 }]
             }
         },

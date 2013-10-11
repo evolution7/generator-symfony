@@ -236,12 +236,6 @@ AppGenerator.prototype.scripts = function scripts() {
   this.copy('scripts/app.js', 'web/scripts/app.js');
 };
 
-AppGenerator.prototype.manifests = function manifests() {
-  this.mkdir('web/manifests');
-  this.copy('manifests/header.html', 'web/manifests/header.html');
-  this.copy('manifests/footer.html', 'web/manifests/footer.html');
-}
-
 AppGenerator.prototype.gitInit = function gitInit() {
   var cb = this.async();
   spawn('git', ['init']).on('exit', function() {

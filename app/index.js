@@ -13,7 +13,7 @@ var AppGenerator = module.exports = function Appgenerator(args, options, config)
       skipInstall: options['skip-install'],
       skipMessage: options['skip-install-message'],
       callback: function(res) {
-        this.spawnCommand('composer', ['update']);
+        spawn('composer', ['update']);
       }.bind(this)
     });
   });
@@ -154,11 +154,16 @@ AppGenerator.prototype.configureVagrant = function configureVagrant() {
   if (this.vagrant) {
     this.copy('vagrant/Vagrantfile', 'Vagrantfile');
     this.directory('vagrant/cookbooks', 'cookbooks');
-    this.spawnCommand('git', ['submodule','add','https://github.com/opscode-cookbooks/build-essential', 'cookbooks/build-essential']);
-    this.spawnCommand('git', ['submodule','add','https://github.com/opscode-cookbooks/ohai', 'cookbooks/ohai']);
-    this.spawnCommand('git', ['submodule','add','https://github.com/opscode-cookbooks/apt', 'cookbooks/apt']);
-    this.spawnCommand('git', ['submodule','add','https://github.com/opscode-cookbooks/apache2', 'cookbooks/apache2']);
-    this.spawnCommand('git', ['submodule','add','https://github.com/opscode-cookbooks/php', 'cookbooks/php']);
+    spawn('git', ['submodule','add','https://github.com/opscode-cookbooks/build-essential', 'cookbooks/build-essential']).on('exit', function() {
+      spawn('git', ['submodule','add','https://github.com/opscode-cookbooks/ohai', 'cookbooks/ohai']).on('exit', function() {
+        spawn('git', ['submodule','add','https://github.com/opscode-cookbooks/apt', 'cookbooks/apt']).on('exit', function() {
+          spawn('git', ['submodule','add','https://github.com/opscode-cookbooks/apache2', 'cookbooks/apache2']).on('exit', function() {
+            spawn('git', ['submodule','add','https://github.com/opscode-cookbooks/php', 'cookbooks/php']).on('exit', function() {
+            });
+          });
+        });
+      });
+    });
   }
 };
 

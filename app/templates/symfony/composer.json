@@ -20,7 +20,7 @@
         "sensio/generator-bundle": "2.3.*",
         "incenteev/composer-parameter-handler": "~2.0",
         "kunstmaan/live-reload-bundle": "dev-master",
-        "evolution7/grunt-usemin-bundle": "0.1.*"
+        "evolution7/grunt-usemin-bundle": "0.2.*"
     },
     "scripts": {
         "post-install-cmd": [

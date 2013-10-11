@@ -23,11 +23,98 @@ var AppGenerator = module.exports = function Appgenerator(args, options, config)
 
 util.inherits(AppGenerator, yeoman.generators.Base);
 
+AppGenerator.prototype.askSymfonyStandard = function askSymfonyStandard() {
+  var cb = this.async();
+
+  this.symfonyStandardDistribution = {
+    username: 'symfony',
+    repository: 'symfony-standard',
+    commit: '2.3'
+  };
+
+  this.symfonyDistribution = null;
+
+  if (!this.options['skip-welcome-message']) {
+    console.log(this.yeoman);
+  }
+
+  var prompts = [{
+    type: 'confirm',
+    name: 'standard',
+    message: 'Would you like to use the Symfony "Standard Edition" distribution',
+    default: true
+  }];
+
+  this.prompt(prompts, function (answers) {
+
+    if (answers.standard) {
+
+      // Use symfony standard edition
+      this.symfonyDistribution = this.symfonyStandardDistribution;
+
+    }
+
+    cb();
+  }.bind(this));
+};
+
+AppGenerator.prototype.askSymfonyCustom = function askSymfonyCustom() {
+  // Check if not using standard distribution
+  if (this.symfonyDistribution == null) {
+    var cb = this.async();
+
+    console.log('Please provide GitHub details of the Symfony distribution you would like to use.');
+    console.log('e.g. http://github.com/[username]/[repository]/tree/[commit].');
+
+    var prompts = [
+    {
+      type: 'input',
+      name: 'username',
+      message: 'Username',
+      default: this.symfonyStandardDistribution.username
+    },
+    {
+      type: 'input',
+      name: 'repository',
+      message: 'Repository',
+      default: this.symfonyStandardDistribution.repository
+    },
+    {
+      type: 'input',
+      name: 'commit',
+      message: 'Commit (commit/branch/tag)',
+      default: this.symfonyStandardDistribution.commit
+    }
+    ];
+
+    this.prompt(prompts, function (values) {
+
+      var repo = 'https://github.com/'
+        + values.username
+        + '/'
+        + values.repository
+        + '/tree/'
+        + values.commit;
+
+      console.log('Thanks! I\'ll use ' + repo);
+      console.log('');
+
+      // Use custom symfony distribution
+      this.symfonyDistribution = [{
+        user: values.username,
+        repo: values.repository,
+        commit: values.commit
+      }];
+
+      cb();
+    }.bind(this));
+  }
+}
+
 AppGenerator.prototype.askFor = function askFor() {
   var cb = this.async();
 
   if (!this.options['skip-welcome-message']) {
-    console.log(this.yeoman);
     console.log('Out of the box I include Symfony, HTML5 Boilerplate, jQuery and Sass.');
   }
 
@@ -76,22 +163,34 @@ AppGenerator.prototype.askFor = function askFor() {
 AppGenerator.prototype.symfonyBase = function symfonyBase() {
   var cb = this.async();
   var appPath = this.destinationRoot();
-  this.remote('symfony', 'symfony-standard', 'v2.3.5', function (err, remote) {
-    if (err) {
-      return cb(err);
-    }
-    remote.directory('app', path.join(appPath, 'app'));
-    remote.directory('src', path.join(appPath, 'src'));
-    remote.directory('web', path.join(appPath, 'web'));
-    cb();
-  });
+  this.remote(this.symfonyDistribution.username,
+              this.symfonyDistribution.repository, 
+              this.symfonyDistribution.commit,
+              function (err, remote) {
+                if (err) {
+                  return cb(err);
+                }
+                remote.directory('app', path.join(appPath, 'app'));
+                remote.directory('src', path.join(appPath, 'src'));
+                remote.directory('web', path.join(appPath, 'web'));
+                cb();
+              });
 }
 
 AppGenerator.prototype.symfonyClear = function symfonyClear() {
-  fs.unlink(path.join(this.destinationRoot(),'web/app_dev.php'));
-  fs.unlink(path.join(this.destinationRoot(),'app/AppKernel.php'));
-  fs.unlink(path.join(this.destinationRoot(),'app/Resources/views/base.html.twig'));
-  fs.unlink(path.join(this.destinationRoot(),'src/Acme/DemoBundle/Resources/views/layout.html.twig'));
+  var cb = this.async();
+  var custom = [
+    'web/app_dev.php',
+    'app/AppKernel.php',
+    'app/Resources/views/base.html.twig',
+    'src/Acme/DemoBundle/Resources/views/layout.html.twig'
+  ];
+  custom.forEach(function(file) {
+    if (fs.existsSync(path.join(this.destinationRoot(),file))) {
+      fs.unlinkSync(path.join(this.destinationRoot(),file));
+    }
+  }.bind(this));
+  cb();
 }
 
 AppGenerator.prototype.symfonyCustom = function symfonyCustom() {
@@ -136,12 +235,6 @@ AppGenerator.prototype.scss = function scss() {
 AppGenerator.prototype.scripts = function scripts() {
   this.copy('scripts/app.js', 'web/scripts/app.js');
 };
-
-AppGenerator.prototype.manifests = function manifests() {
-  this.mkdir('web/manifests');
-  this.copy('manifests/header.html', 'web/manifests/header.html');
-  this.copy('manifests/footer.html', 'web/manifests/footer.html');
-}
 
 AppGenerator.prototype.gitInit = function gitInit() {
   var cb = this.async();

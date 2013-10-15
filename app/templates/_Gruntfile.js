@@ -34,8 +34,8 @@ module.exports = function (grunt) {
         yeoman: {
             app: 'web',
             dist: 'web/dist',
-            sfApp: 'app/Resources/views',
-            sfDist: 'app/dist/Resources/views'
+            sfApp: 'app/Resources',
+            sfDist: 'app/dist/Resources'
         },
 
         /****************************************************************
@@ -65,7 +65,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: [
-                    '<%%= yeoman.sfApp %>/*.html.twig',
+                    '<%%= yeoman.sfApp %>/**/*.html.twig',
                     '<%%= yeoman.app %>/css/{,*/}*.css',
                     '{<%%= yeoman.dist %>,<%%= yeoman.app %>}/scripts/{,*/}*.js',
                     '<%%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
@@ -235,14 +235,14 @@ module.exports = function (grunt) {
          * into a set of HTML files (or any templates/views).
          */
         useminPrepare: {
-            html: '<%%= yeoman.sfApp %>/*.html.twig',
+            html: '<%%= yeoman.sfApp %>/**/*.html.twig',
             options: {
                 root: '<%%= yeoman.app %>',
                 dest: '<%%= yeoman.dist %>/../' // This allows us to use /dist/ in the manifests
             }
         },
         usemin: {
-            html: ['<%%= yeoman.sfDist %>/*.html.twig'],
+            html: ['<%%= yeoman.sfDist %>/**/*.html.twig'],
             options: {
                 assetsDirs: ['<%%= yeoman.dist %>/../']
             }
@@ -270,7 +270,7 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%%= yeoman.sfApp %>',
-                    src: '*.html.twig',
+                    src: '**/*.html.twig',
                     dest: '<%%= yeoman.sfDist %>'
                 }]
             }

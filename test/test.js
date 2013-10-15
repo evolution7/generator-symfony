@@ -12,6 +12,8 @@ describe('Symfony generator test', function () {
       'composer.json',
       'web/app_dev.php',
       'app/AppKernel.php',
+      'app/config/config_dev.yml',
+      'app/config/routing.yml',
       'app/Resources/views/base.html.twig',
       'src/Acme/DemoBundle/Resources/views/layout.html.twig',
       
@@ -63,14 +65,18 @@ describe('Symfony generator test', function () {
     expected.push('cookbooks/app');
     
     helpers.mockPrompt(this.symfony, {
-      features: ['vagrant']
+      symfonyStandard: 'y',
+      // symfonyUsername: 'symfony',
+      // symfonyRepository: 'symfony-standard',
+      // symfonyCommit: '2.3',
+      cssExtension: 'sass',
+      features: [ 'vagrant' ]
     });
 
-    this.symfony.vagrant = true;
     this.symfony.options['skip-install'] = true;
     this.symfony.run({}, function () {
-      helpers.assertFiles(expected);
-      done();
+       helpers.assertFiles(expected);
+       done();
     });
   });
 
@@ -78,14 +84,18 @@ describe('Symfony generator test', function () {
     var expected = this.baseFiles;
 
     helpers.mockPrompt(this.symfony, {
-      features: ['vagrant']
+      symfonyStandard: 'y',
+      // symfonyUsername: 'symfony',
+      // symfonyRepository: 'symfony-standard',
+      // symfonyCommit: '2.3',
+      cssExtension: 'sass',
+      features: [ ]
     });
 
-    this.symfony.vagrant = false;
     this.symfony.options['skip-install'] = true;
     this.symfony.run({}, function () {
-      helpers.assertFiles(expected);
-      done();
+       helpers.assertFiles(expected);
+       done();
     });
   });
 });

@@ -48,11 +48,15 @@ module.exports = function (grunt) {
          *
          * Run predefined tasks whenever watched file patterns are added, changed or deleted.
          */
-        watch: {
+        watch: {<% if (cssExtension === 'compass') { %>
             compass: {
                 files: ['<%%= yeoman.app %>/scss/{,*/}*.{scss,sass}'],
                 tasks: ['compass:watch', 'autoprefixer']
-            },
+            },<% } else { %>
+            sass: {
+                files: ['<%%= yeoman.app %>/scss/{,*/}*.{scss,sass}'],
+                tasks: ['sass:watch', 'autoprefixer']
+            },<% } %>
             livereload: {
                 options: {
                     livereload: {
@@ -150,7 +154,7 @@ module.exports = function (grunt) {
                 }
             }
         },
-
+        <% if (cssExtension === 'compass') { %>
         /**
          * grunt-contrib-compass
          * @see https://github.com/gruntjs/grunt-contrib-compass
@@ -186,7 +190,38 @@ module.exports = function (grunt) {
                 }
             }
         },
-
+        <% } else { %>
+        /**
+         * grunt-contrib-sass
+         * @see https://github.com/gruntjs/grunt-contrib-sass
+         *
+         * Compile Sass to CSS using Sass.
+         */
+        sass: {
+            watch: {
+                files: [{
+                    expand: true,
+                    cwd: '<%%= yeoman.app %>/scss',
+                    src: ['*.scss'],
+                    dest: '<%%= yeoman.app %>/css',
+                    ext: '.css'
+                }],
+                debugInfo: true,
+                lineNumbers: true,
+                noCache: true
+            },
+            dist: {
+                files: [{
+                    expand: true,
+                    cwd: '<%%= yeoman.app %>/scss',
+                    src: ['*.scss'],
+                    dest: '<%%= yeoman.app %>/css',
+                    ext: '.css'
+                }],
+                noCache: true
+            }
+        },
+        <% } %>
         /**
          * grunt-autoprefixer
          * @see https://github.com/nDmitry/grunt-autoprefixer
@@ -373,8 +408,9 @@ module.exports = function (grunt) {
                 'copy:styles'
             ],
             dist: [
-                'compass',
-                'copy:styles',
+                <% if (cssExtension === 'compass') { %>'compass:dist',
+                <% } else { %>'sass:dist',
+                <% } %>'copy:styles',
                 'imagemin',
                 'svgmin',
                 'htmlmin'

@@ -2,6 +2,7 @@
 var fs = require('fs');
 var util = require('util');
 var path = require('path');
+var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var yeoman = require('yeoman-generator');
 
@@ -13,44 +14,80 @@ var AppGenerator = module.exports = function Appgenerator(args, options, config)
       skipInstall: options['skip-install'],
       skipMessage: options['skip-install-message'],
       callback: function(res) {
-        spawn('composer', ['update']);
+        if (this.runComposer) {
+          spawn('composer', ['update']);
+        }
       }.bind(this)
     });
   });
 
   this.pkg = JSON.parse(this.readFileAsString(path.join(__dirname, '../package.json')));
-};
 
-util.inherits(AppGenerator, yeoman.generators.Base);
-
-AppGenerator.prototype.askSymfonyStandard = function askSymfonyStandard() {
-  var cb = this.async();
-
+  // Defaults
   this.symfonyStandardDistribution = {
     username: 'symfony',
     repository: 'symfony-standard',
     commit: '2.3'
   };
 
-  this.symfonyDistribution = null;
+};
 
+util.inherits(AppGenerator, yeoman.generators.Base);
+
+AppGenerator.prototype.welcomeMessage = function welcomeMessage() {
   if (!this.options['skip-welcome-message']) {
     console.log(this.yeoman);
   }
+};
+
+AppGenerator.prototype.checkComposer = function checkComposer() {
+  var cb = this.async();
+  // Check if composer is installed globally
+  this.runComposer = false;
+  exec('composer', ['-V'], function (error, stdout, stderr) {
+    if (error != null) {
+      var prompts = [{
+        type: 'confirm',
+        name: 'continue',
+        message: 'WARNING: Composer not found. Please install globally. Continue?',
+        default: false
+      }];
+      this.prompt(prompts, function (answers) {
+        if (answers.continue) {
+          console.log('Please run composer after this generator completes.');
+          console.log('See http://getcomposer.org for details.');
+          console.log('');
+          cb();  
+        }
+      }.bind(this));
+    } else {
+      this.runComposer = true;
+      cb();
+    }
+  }.bind(this));
+};
+
+AppGenerator.prototype.askSymfonyStandard = function askSymfonyStandard() {
+  var cb = this.async();
 
   var prompts = [{
     type: 'confirm',
-    name: 'standard',
+    name: 'symfonyStandard',
     message: 'Would you like to use the Symfony "Standard Edition" distribution',
     default: true
   }];
 
   this.prompt(prompts, function (answers) {
 
-    if (answers.standard) {
+    if (answers.symfonyStandard) {
 
       // Use symfony standard edition
       this.symfonyDistribution = this.symfonyStandardDistribution;
+
+    } else {
+
+      // Use custom distribution
+      this.symfonyDistribution = null;
 
     }
 
@@ -69,19 +106,19 @@ AppGenerator.prototype.askSymfonyCustom = function askSymfonyCustom() {
     var prompts = [
     {
       type: 'input',
-      name: 'username',
+      name: 'symfonyUsername',
       message: 'Username',
       default: this.symfonyStandardDistribution.username
     },
     {
       type: 'input',
-      name: 'repository',
+      name: 'symfonyRepository',
       message: 'Repository',
       default: this.symfonyStandardDistribution.repository
     },
     {
       type: 'input',
-      name: 'commit',
+      name: 'symfonyCommit',
       message: 'Commit (commit/branch/tag)',
       default: this.symfonyStandardDistribution.commit
     }
@@ -90,28 +127,51 @@ AppGenerator.prototype.askSymfonyCustom = function askSymfonyCustom() {
     this.prompt(prompts, function (values) {
 
       var repo = 'https://github.com/'
-        + values.username
+        + values.symfonyUsername
         + '/'
-        + values.repository
+        + values.symfonyRepository
         + '/tree/'
-        + values.commit;
+        + values.symfonyCommit;
 
       console.log('Thanks! I\'ll use ' + repo);
       console.log('');
 
       // Use custom symfony distribution
-      this.symfonyDistribution = [{
-        user: values.username,
-        repo: values.repository,
-        commit: values.commit
-      }];
+      this.symfonyDistribution = {
+        username: values.symfonyUsername,
+        repository: values.symfonyRepository,
+        commit: values.symfonyCommit
+      };
 
       cb();
     }.bind(this));
   }
 }
 
-AppGenerator.prototype.askFor = function askFor() {
+AppGenerator.prototype.askCssExtension = function askCssExtension() {
+  var cb = this.async();
+
+  var prompts = [{
+    type: 'list',
+    name: 'cssExtension',
+    message: 'Which CSS extension tool would you like to use?',
+    default: 'sass',
+    choices: ['sass', 'compass']
+  }];
+
+  this.prompt(prompts, function (answers) {
+
+    if (answers.cssExtension) {
+      this.cssExtension = answers.cssExtension;
+    } else {
+      this.cssExtension = 'sass';
+    }
+
+    cb();
+  }.bind(this));
+};
+
+AppGenerator.prototype.askFeatures = function askFeatures() {
   var cb = this.async();
 
   if (!this.options['skip-welcome-message']) {
@@ -132,10 +192,6 @@ AppGenerator.prototype.askFor = function askFor() {
     //   value: 'inuit',
     //   checked: true
     // }, {
-    //   name: 'Compass',
-    //   value: 'compass',
-    //   checked: false
-    // }, {
     //   name: 'Bootstrap',
     //   value: 'bootstrap',
     //   checked: false
@@ -151,9 +207,6 @@ AppGenerator.prototype.askFor = function askFor() {
     // manually deal with the response, get back and store the results.
     // we change a bit this way of doing to automatically do this in the self.prompt() method.
     this.vagrant = hasFeature('vagrant');
-    // this.inuit = hasFeature('inuit');
-    // this.compass = hasFeature('compass');
-    // this.bootstrap = hasFeature('bootstrap');
     this.bootstrap = 0;
 
     cb();
@@ -182,6 +235,8 @@ AppGenerator.prototype.symfonyClear = function symfonyClear() {
   var custom = [
     'web/app_dev.php',
     'app/AppKernel.php',
+    'app/config/config_dev.yml',
+    'app/config/routing.yml',
     'app/Resources/views/base.html.twig',
     'src/Acme/DemoBundle/Resources/views/layout.html.twig'
   ];
@@ -197,6 +252,8 @@ AppGenerator.prototype.symfonyCustom = function symfonyCustom() {
   this.copy('symfony/composer.json', 'composer.json');
   this.copy('symfony/app_dev.php', 'web/app_dev.php');
   this.copy('symfony/AppKernel.php', 'app/AppKernel.php');
+  this.copy('symfony/config_dev.yml', 'app/config/config_dev.yml');
+  this.copy('symfony/routing.yml', 'app/config/routing.yml');
   this.copy('symfony/base.html.twig', 'app/Resources/views/base.html.twig');
   this.copy('symfony/layout.html.twig', 'src/Acme/DemoBundle/Resources/views/layout.html.twig');
 };

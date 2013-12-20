@@ -285,8 +285,8 @@ AppGenerator.prototype.editorConfig = function editorConfig() {
 };
 
 AppGenerator.prototype.styles = function styles() {
-  this.copy('styles/screen.scss', 'web/styles/screen.scss');
-  this.copy('styles/print.scss', 'web/styles/print.scss');
+  this.copy('styles/app.scss', 'web/styles/app.scss');
+  this.copy('styles/print.css', 'web/styles/print.css');
 };
 
 AppGenerator.prototype.scripts = function scripts() {

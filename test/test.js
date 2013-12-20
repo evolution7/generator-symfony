@@ -31,8 +31,8 @@ describe('Symfony generator test', function () {
 
       '.editorconfig',
 
-      'web/scss/screen.scss',
-      'web/scss/print.scss',
+      'web/styles/screen.scss',
+      'web/styles/print.scss',
       
       'web/scripts/app.js',
 

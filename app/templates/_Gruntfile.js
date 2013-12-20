@@ -50,11 +50,11 @@ module.exports = function (grunt) {
          */
         watch: {<% if (cssExtension === 'compass') { %>
             compass: {
-                files: ['<%%= yeoman.app %>/scss/{,*/}*.{scss,sass}'],
+                files: ['<%%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
                 tasks: ['compass:watch', 'autoprefixer']
             },<% } else { %>
             sass: {
-                files: ['<%%= yeoman.app %>/scss/{,*/}*.{scss,sass}'],
+                files: ['<%%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
                 tasks: ['sass:watch', 'autoprefixer']
             },<% } %>
             livereload: {
@@ -70,7 +70,7 @@ module.exports = function (grunt) {
                 },
                 files: [
                     '<%%= yeoman.sfApp %>/**/*.html.twig',
-                    '<%%= yeoman.app %>/css/{,*/}*.css',
+                    '<%%= yeoman.app %>/styles/{,*/}*.css',
                     '{<%%= yeoman.dist %>,<%%= yeoman.app %>}/scripts/{,*/}*.js',
                     '<%%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
                 ]
@@ -163,7 +163,7 @@ module.exports = function (grunt) {
          */
         compass: {
             options: {
-                sassDir: '<%%= yeoman.app %>/scss',
+                sassDir: '<%%= yeoman.app %>/styles',
                 cssDir: '<%%= yeoman.app %>/css',
                 generatedImagesDir: '<%%= yeoman.dist %>/images/generated',
                 imagesDir: '<%%= yeoman.app %>/images',
@@ -201,7 +201,7 @@ module.exports = function (grunt) {
             watch: {
                 files: [{
                     expand: true,
-                    cwd: '<%%= yeoman.app %>/scss',
+                    cwd: '<%%= yeoman.app %>/styles',
                     src: ['*.scss'],
                     dest: '<%%= yeoman.app %>/css',
                     ext: '.css'
@@ -213,7 +213,7 @@ module.exports = function (grunt) {
             dist: {
                 files: [{
                     expand: true,
-                    cwd: '<%%= yeoman.app %>/scss',
+                    cwd: '<%%= yeoman.app %>/styles',
                     src: ['*.scss'],
                     dest: '<%%= yeoman.app %>/css',
                     ext: '.css'

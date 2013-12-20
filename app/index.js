@@ -284,9 +284,9 @@ AppGenerator.prototype.editorConfig = function editorConfig() {
   this.copy('editorconfig', '.editorconfig');
 };
 
-AppGenerator.prototype.scss = function scss() {
-  this.copy('scss/screen.scss', 'web/scss/screen.scss');
-  this.copy('scss/print.scss', 'web/scss/print.scss');
+AppGenerator.prototype.styles = function styles() {
+  this.copy('styles/screen.scss', 'web/styles/screen.scss');
+  this.copy('styles/print.scss', 'web/styles/print.scss');
 };
 
 AppGenerator.prototype.scripts = function scripts() {

@@ -5,17 +5,17 @@
         <meta name="robots" content="noindex,nofollow" />
         <title>{% block title %}{% endblock %}</title>
 
-        <!-- build:css /dist/css/screen.css -->
-        <link rel="stylesheet" href="/bundles/framework/css/structure.css">
-        <link rel="stylesheet" href="/bundles/framework/css/body.css">
-        <link rel="stylesheet" href="/css/screen.css">
+        <!-- build:css dist/styles/app.min.css -->
+        <link rel="stylesheet" href="bundles/framework/css/structure.css">
+        <link rel="stylesheet" href="bundles/framework/css/body.css">
+        <link rel="stylesheet" href=".tmp/styles/app.css">
         <!-- endbuild -->
-        <!-- build:css /dist/css/print.css -->
-        <link rel="stylesheet" href="/css/print.css" media="print">
+        <!-- build:css dist/styles/print.min.css -->
+        <link rel="stylesheet" href=".tmp/styles/print.css" media="print">
         <!-- endbuild -->
-        <!-- build:js /dist/scripts/vendor/izr.js -->
-        <script src="/bower_components/modernizr/modernizr.js"></script>
-        <script src="/bower_components/detectizr/detectizr.js"></script>
+        <!-- build:js dist/scripts/vendor/izr.js -->
+        <script src="bower_components/modernizr/modernizr.js"></script>
+        <script src="bower_components/detectizr/detectizr.js"></script>
         <script>
           Modernizr.Detectizr.detect({detectScreen:false});
         </script>
@@ -56,10 +56,10 @@
             </div>
         </div>
         
-        <!-- build:js /dist/scripts/app.js -->
+        <!-- build:js dist/scripts/app.min.js -->
         <!-- bower:js -->
-        <script src="/bower_components/jquery/jquery.js"></script>
-        <script src="/scripts/app.js"></script>
+        <script src="bower_components/jquery/jquery.js"></script>
+        <script src="scripts/app.js"></script>
         <!-- endbower -->
         <!-- endbuild -->
 

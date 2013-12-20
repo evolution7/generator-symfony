@@ -186,17 +186,16 @@ AppGenerator.prototype.askFeatures = function askFeatures() {
       name: 'Vagrant (requires "precise64" box)',
       value: 'vagrant',
       checked: true
-    }
-    // , {
-    //   name: 'inuit.css',
-    //   value: 'inuit',
-    //   checked: true
-    // }, {
-    //   name: 'Bootstrap',
-    //   value: 'bootstrap',
-    //   checked: false
-    // }
-    ]
+    },
+    {
+      name: 'inuit.css',
+      value: 'inuit',
+      checked: true
+    }, {
+      name: 'Bootstrap',
+      value: 'bootstrap',
+      checked: false
+    }]
   }];
 
   this.prompt(prompts, function (answers) {
@@ -207,7 +206,8 @@ AppGenerator.prototype.askFeatures = function askFeatures() {
     // manually deal with the response, get back and store the results.
     // we change a bit this way of doing to automatically do this in the self.prompt() method.
     this.vagrant = hasFeature('vagrant');
-    this.bootstrap = 0;
+    this.inuit = hasFeature('inuit');
+    this.bootstrap = hasFeature('bootstrap');
 
     cb();
   }.bind(this));
@@ -284,9 +284,9 @@ AppGenerator.prototype.editorConfig = function editorConfig() {
   this.copy('editorconfig', '.editorconfig');
 };
 
-AppGenerator.prototype.scss = function scss() {
-  this.copy('scss/screen.scss', 'web/scss/screen.scss');
-  this.copy('scss/print.scss', 'web/scss/print.scss');
+AppGenerator.prototype.styles = function styles() {
+  this.copy('styles/app.scss', 'web/styles/app.scss');
+  this.copy('styles/print.css', 'web/styles/print.css');
 };
 
 AppGenerator.prototype.scripts = function scripts() {

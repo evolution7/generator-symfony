@@ -34,6 +34,7 @@ module.exports = function (grunt) {
         yeoman: {
             app: 'web',
             dist: 'web/dist',
+            tmp: 'web/.tmp',
             sfApp: 'app/Resources',
             sfDist: 'app/dist/Resources'
         },
@@ -48,21 +49,26 @@ module.exports = function (grunt) {
          *
          * Run predefined tasks whenever watched file patterns are added, changed or deleted.
          */
+         // Compiling SASS, moves to .tmp and autoprefixes
         watch: {<% if (cssExtension === 'compass') { %>
             compass: {
-                files: ['<%%= yeoman.app %>/scss/{,*/}*.{scss,sass}'],
+                files: ['<%%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
                 tasks: ['compass:watch', 'autoprefixer']
             },<% } else { %>
             sass: {
-                files: ['<%%= yeoman.app %>/scss/{,*/}*.{scss,sass}'],
-                tasks: ['sass:watch', 'autoprefixer']
+                files: ['<%%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
+                tasks: ['sass', 'autoprefixer']
             },<% } %>
+            // Move CSS to .tmp and autoprefixes
+            styles: {
+                files: ['<%%= yeoman.app %>/styles/{,*/}*.css'],
+                tasks: ['copy:styles', 'autoprefixer']
+            },
             livereload: {
                 options: {
                     livereload: {
                         options: {
                             base: [
-                                '<%%= yeoman.dist %>',
                                 '<%%= yeoman.app %>'
                             ]
                         }
@@ -70,8 +76,8 @@ module.exports = function (grunt) {
                 },
                 files: [
                     '<%%= yeoman.sfApp %>/**/*.html.twig',
-                    '<%%= yeoman.app %>/css/{,*/}*.css',
-                    '{<%%= yeoman.dist %>,<%%= yeoman.app %>}/scripts/{,*/}*.js',
+                    '<%%= yeoman.tmp %>/{,*/}*.css',
+                    '<%%= yeoman.app %>}/scripts/{,*/}*.js',
                     '<%%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
                 ]
             }
@@ -94,7 +100,6 @@ module.exports = function (grunt) {
                     hostname: 'localhost', // change to '0.0.0.0' for external access
                     port: 9000,
                     base: [
-                        '<%%= yeoman.dist %>',
                         'test',
                         '<%%= yeoman.app %>'
                     ]
@@ -109,14 +114,14 @@ module.exports = function (grunt) {
          * Clean files and folders.
          */
         clean: {
-            test: '<%%= yeoman.dist %>',
+            dev: '<%%= yeoman.tmp %>',
+            build: '.tmp',
             dist: {
                 files: [{
                     dot: true,
                     src: [
+                        '<%%= yeoman.sfDist %>',
                         '<%%= yeoman.dist %>',
-                        '<%%= yeoman.dist %>/*',
-                        '!<%%= yeoman.dist %>/.git*'
                     ]
                 }]
             }
@@ -163,8 +168,8 @@ module.exports = function (grunt) {
          */
         compass: {
             options: {
-                sassDir: '<%%= yeoman.app %>/scss',
-                cssDir: '<%%= yeoman.app %>/css',
+                sassDir: '<%%= yeoman.app %>/styles',
+                cssDir: '<%%= yeoman.tmp %>/styles',
                 generatedImagesDir: '<%%= yeoman.dist %>/images/generated',
                 imagesDir: '<%%= yeoman.app %>/images',
                 javascriptsDir: '<%%= yeoman.app %>/scripts',
@@ -198,27 +203,14 @@ module.exports = function (grunt) {
          * Compile Sass to CSS using Sass.
          */
         sass: {
-            watch: {
+            all: {
                 files: [{
                     expand: true,
-                    cwd: '<%%= yeoman.app %>/scss',
+                    cwd: '<%%= yeoman.app %>/styles',
                     src: ['*.scss'],
-                    dest: '<%%= yeoman.app %>/css',
+                    dest: '<%%= yeoman.tmp %>/styles',
                     ext: '.css'
                 }],
-                debugInfo: true,
-                lineNumbers: true,
-                noCache: true
-            },
-            dist: {
-                files: [{
-                    expand: true,
-                    cwd: '<%%= yeoman.app %>/scss',
-                    src: ['*.scss'],
-                    dest: '<%%= yeoman.app %>/css',
-                    ext: '.css'
-                }],
-                noCache: true
             }
         },
         <% } %>
@@ -231,14 +223,14 @@ module.exports = function (grunt) {
          */
         autoprefixer: {
             options: {
-                browsers: ['last 1 version']
+                browsers: ['last 5 versions']
             },
             dist: {
                 files: [{
                     expand: true,
-                    cwd: '<%%= yeoman.app %>/css/',
+                    cwd: '<%%= yeoman.tmp %>/styles',
                     src: '{,*/}*.css',
-                    dest: '<%%= yeoman.app %>/css/'
+                    dest: '<%%= yeoman.tmp %>/styles'
                 }]
             }
         },
@@ -250,15 +242,8 @@ module.exports = function (grunt) {
          * Static file asset revisioning through content hashing
          */
         rev: {
-            dist: {
-                files: {
-                    src: [
-                        '<%%= yeoman.dist %>/scripts/{,*/}*.js',
-                        '<%%= yeoman.dist %>/css/{,*/}*.css',
-                        '<%%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp}',
-                        '<%%= yeoman.dist %>/fonts/{,*/}*.*'
-                    ]
-                }
+            files: {
+                src: ['<%%= yeoman.dist %>/**/*.{js,css}']
             }
         },
 
@@ -273,13 +258,13 @@ module.exports = function (grunt) {
             html: '<%%= yeoman.sfApp %>/**/*.html.twig',
             options: {
                 root: '<%%= yeoman.app %>',
-                dest: '<%%= yeoman.dist %>/../' // This allows us to use /dist/ in the manifests
+                dest: '<%%= yeoman.dist %>/..' // This allows us to use /dist/ in the manifests
             }
         },
         usemin: {
             html: ['<%%= yeoman.sfDist %>/**/*.html.twig'],
             options: {
-                assetsDirs: ['<%%= yeoman.dist %>/../']
+                assetsDirs: ['<%%= yeoman.dist %>/..']
             }
         },
 
@@ -359,8 +344,6 @@ module.exports = function (grunt) {
                     cwd: '<%%= yeoman.app %>',
                     dest: '<%%= yeoman.dist %>',
                     src: [
-                        '*.{ico,png,txt}',
-                        '.htaccess',
                         'images/{,*/}*.{webp,gif}',
                         'fonts/{,*/}*.*'<% if (bootstrap) { %>,
                         'bower_components/sass-bootstrap/fonts/*.*'<% } %>
@@ -370,8 +353,8 @@ module.exports = function (grunt) {
             styles: {
                 expand: true,
                 dot: true,
-                cwd: '<%%= yeoman.app %>/css',
-                dest: '<%%= yeoman.dist %>/css/',
+                cwd: '<%%= yeoman.app %>/styles',
+                dest: '<%%= yeoman.tmp %>/styles',
                 src: '{,*/}*.css'
             }
         },
@@ -389,7 +372,7 @@ module.exports = function (grunt) {
             outputFile: '<%%= yeoman.dist %>/bower_components/modernizr/modernizr.js',
             files: [
                 '<%%= yeoman.dist %>/scripts/{,*/}*.js',
-                '<%%= yeoman.dist %>/css/{,*/}*.css',
+                '<%%= yeoman.dist %>/styles/{,*/}*.css',
                 '!<%%= yeoman.dist %>/scripts/vendor/*'
             ],
             uglify: true
@@ -405,12 +388,14 @@ module.exports = function (grunt) {
          */
         concurrent: {
             test: [
+                <% if (cssExtension === 'compass') { %>'compass:dist',
+                <% } else { %>'sass',<% } %>
                 'copy:styles'
             ],
             dist: [
                 <% if (cssExtension === 'compass') { %>'compass:dist',
-                <% } else { %>'sass:dist',
-                <% } %>'copy:styles',
+                <% } else { %>'sass',<% } %>
+                'copy:styles',
                 'imagemin',
                 'svgmin',
                 'htmlmin'
@@ -503,7 +488,8 @@ module.exports = function (grunt) {
      * Test task
      */
     grunt.registerTask('test', [
-        'clean:test',
+        'clean:dev',
+        'jshint',
         'concurrent:test',
         'autoprefixer',
         'connect:test',
@@ -515,7 +501,7 @@ module.exports = function (grunt) {
      * Build task
      */
     grunt.registerTask('build', [
-        'clean:dist',
+        'clean',
         'useminPrepare',
         'concurrent:dist',
         'autoprefixer',
@@ -525,19 +511,17 @@ module.exports = function (grunt) {
         'cssmin',
         // Disable if usemin has no js
         'uglify',
-        'modernizr',
         'copy:dist',
         'rev',
-        'usemin'
+        'usemin',
+        'clean:build'
     ]);
 
     /**
      * Default task
      */
     grunt.registerTask('default', [
-        'jshint',
-        'test',
-        'build'
+        'watch'
     ]);
 
 };

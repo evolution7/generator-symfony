@@ -1,10 +1,11 @@
 {
   "name": "<%= _.slugify(appname) %>",
   "version": "0.0.0",
-  "dependencies": {<% if (bootstrap) { %>
+  "dependencies": {<% if (inuit) { %>
+    "inuit.css": "~5.0.0",<% } if (bootstrap) { %>
     "sass-bootstrap": "~3.0.0",<% } %>
     "modernizr": "~2.6.2",
-    "detectizr": "latest",
+    "detectizr": "~1.4.5",
     "jquery": "~1.10.2"
   },
   "devDependencies": {}

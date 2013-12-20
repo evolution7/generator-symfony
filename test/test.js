@@ -32,7 +32,7 @@ describe('Symfony generator test', function () {
       '.editorconfig',
 
       'web/styles/screen.scss',
-      'web/styles/print.scss',
+      'web/styles/print.css',
       
       'web/scripts/app.js',
 

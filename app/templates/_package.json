@@ -19,7 +19,7 @@
     "grunt-contrib-watch": "~0.5.2",
     "grunt-rev": "~0.1.0",
     "grunt-autoprefixer": "~0.2.0",
-    "grunt-usemin": "git+ssh://git@github.com/yeoman/grunt-usemin.git#v2.0",
+    "grunt-usemin": "~2.0.0",
     "grunt-mocha": "~0.4.0",
     "grunt-modernizr": "~0.3.0",
     "grunt-svgmin": "~0.2.0",

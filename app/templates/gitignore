@@ -1,3 +1,5 @@
+
+# Start of symfony-generator
 ._*
 .DS_Store
 .vagrant
@@ -19,4 +21,4 @@ web/bower_components
 web/dist
 web/css
 app/dist
-
+# End of symfony-generator

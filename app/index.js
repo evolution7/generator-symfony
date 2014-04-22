@@ -7,15 +7,22 @@ var spawn = require('child_process').spawn;
 var yeoman = require('yeoman-generator');
 
 var AppGenerator = module.exports = function Appgenerator(args, options, config) {
+
   yeoman.generators.Base.apply(this, arguments);
+
 
   this.on('end', function () {
     this.installDependencies({
       skipInstall: options['skip-install'],
       skipMessage: options['skip-install-message'],
       callback: function(res) {
-        if (this.runComposer) {
-          spawn('composer', ['update']);
+        console.log('Getting the composer dependencies');
+        var composerReqs = ['evolution7/grunt-usemin-bundle="0.3.*"'];
+        var composerDevReqs = ['kunstmaan/live-reload-bundle=dev-master'];
+        if (this.globalComposer) {
+          var comspawn = spawn('composer', ['install']);
+        } else {
+          spawn('php', ['composer.phar', 'install']);
         }
       }.bind(this)
     });
@@ -43,25 +50,27 @@ AppGenerator.prototype.welcomeMessage = function welcomeMessage() {
 AppGenerator.prototype.checkComposer = function checkComposer() {
   var cb = this.async();
   // Check if composer is installed globally
-  this.runComposer = false;
+  this.globalComposer = false;
   exec('composer', ['-V'], function (error, stdout, stderr) {
     if (error != null) {
       var prompts = [{
         type: 'confirm',
         name: 'continue',
-        message: 'WARNING: Composer not found. Please install globally. Continue?',
+        message: 'WARNING: No global composer installation found. We will install locally if you decide to continue. Continue?',
         default: false
       }];
       this.prompt(prompts, function (answers) {
         if (answers.continue) {
-          console.log('Please run composer after this generator completes.');
-          console.log('See http://getcomposer.org for details.');
+          // Use the secondary installation method as we cannot assume curl is installed
+          exec('php -r "readfile(\'https://getcomposer.org/installer\');" | php');
+          console.log('Installing composer locally.');
+          console.log('See http://getcomposer.org for more details on composer.');
           console.log('');
-          cb();  
+          cb();
         }
       }.bind(this));
     } else {
-      this.runComposer = true;
+      this.globalComposer = true;
       cb();
     }
   }.bind(this));
@@ -217,15 +226,13 @@ AppGenerator.prototype.symfonyBase = function symfonyBase() {
   var cb = this.async();
   var appPath = this.destinationRoot();
   this.remote(this.symfonyDistribution.username,
-              this.symfonyDistribution.repository, 
+              this.symfonyDistribution.repository,
               this.symfonyDistribution.commit,
               function (err, remote) {
                 if (err) {
                   return cb(err);
                 }
-                remote.directory('app', path.join(appPath, 'app'));
-                remote.directory('src', path.join(appPath, 'src'));
-                remote.directory('web', path.join(appPath, 'web'));
+                remote.directory('.', path.join(appPath, '.'));
                 cb();
               });
 }
@@ -234,9 +241,6 @@ AppGenerator.prototype.symfonyClear = function symfonyClear() {
   var cb = this.async();
   var custom = [
     'web/app_dev.php',
-    'app/AppKernel.php',
-    'app/config/config_dev.yml',
-    'app/config/routing.yml',
     'app/Resources/views/base.html.twig',
     'src/Acme/DemoBundle/Resources/views/layout.html.twig'
   ];
@@ -249,11 +253,7 @@ AppGenerator.prototype.symfonyClear = function symfonyClear() {
 }
 
 AppGenerator.prototype.symfonyCustom = function symfonyCustom() {
-  this.copy('symfony/composer.json', 'composer.json');
   this.copy('symfony/app_dev.php', 'web/app_dev.php');
-  this.copy('symfony/AppKernel.php', 'app/AppKernel.php');
-  this.copy('symfony/config_dev.yml', 'app/config/config_dev.yml');
-  this.copy('symfony/routing.yml', 'app/config/routing.yml');
   this.copy('symfony/base.html.twig', 'app/Resources/views/base.html.twig');
   this.copy('symfony/layout.html.twig', 'src/Acme/DemoBundle/Resources/views/layout.html.twig');
 };
@@ -267,7 +267,12 @@ AppGenerator.prototype.packageJSON = function packageJSON() {
 };
 
 AppGenerator.prototype.git = function git() {
-  this.copy('gitignore', '.gitignore');
+  console.log('This will add some generated values to the gitignore file');
+  var gitignorePath = ".gitignore";
+  var gitignoreContents = this.readFileAsString(gitignorePath);
+  var extraContents = this.read("gitignore");
+  gitignoreContents += extraContents;
+  this.write(gitignorePath, gitignoreContents);
   this.copy('gitattributes', '.gitattributes');
 };
 
@@ -298,6 +303,33 @@ AppGenerator.prototype.gitInit = function gitInit() {
   spawn('git', ['init']).on('exit', function() {
     cb();
   });
+}
+
+AppGenerator.prototype.updateAppKernel = function updateAppKernel() {
+  console.log('This will add the custom bundles to the AppKernel');
+  var appKernelPath = "app/AppKernel.php";
+  var appKernelContents = this.readFileAsString(appKernelPath);
+  var replaceValue = this.read("symfony/AppKernel.php");
+  appKernelContents = appKernelContents.replace("return $bundles;", replaceValue);
+  this.write(appKernelPath, appKernelContents);
+}
+
+AppGenerator.prototype.updateComposerFile = function updateComposerFile() {
+  console.log('This will add the custom includes to the composer.json file');
+  var appKernelPath = "composer.json";
+  var appKernelContents = this.readFileAsString(appKernelPath);
+  var replaceValue = this.read("symfony/composer.json");
+  appKernelContents = appKernelContents.replace('"require": {', replaceValue);
+  this.write(appKernelPath, appKernelContents);
+}
+
+AppGenerator.prototype.updateConfigDev = function updateConfigDev() {
+  console.log('This will enable live reload in the development environment');
+  var configDevPath = "app/config/config_dev.yml";
+  var configDevContents = this.readFileAsString(configDevPath);
+  var extraContents = this.read("symfony/config_dev.yml");
+  configDevContents += extraContents;
+  this.write(configDevPath, configDevContents);
 }
 
 AppGenerator.prototype.configureVagrant = function configureVagrant() {
